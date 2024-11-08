@@ -1,22 +1,38 @@
-import os
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DB_USER = os.getenv("FSTR_DB_LOGIN")
-DB_PASSWORD = os.getenv("FSTR_DB_PASS")
-DB_HOST = os.getenv("FSTR_DB_HOST")
-DB_PORT = os.getenv("FSTR_DB_PORT")
-DB_NAME = os.getenv("FSTR_DB_NAME")
-
-DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-engine = create_async_engine(DATABASE_URL, echo=True)
-async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import (async_sessionmaker, create_async_engine, AsyncSession, AsyncEngine, AsyncConnection)
+from src.core.config import settings
+from typing import Union, Callable, Annotated
 
 
-async def get_db():
-    async with async_session_maker() as session:
-        yield session
+class InternalError(Exception):
+    pass
+
+
+# Функция для получения асинхронной сессии
+async def get_async_session() -> AsyncSession:
+    async with async_session() as session:
+        try:
+            yield session
+        except InternalError:
+            await session.rollback()  # откат транзакции в случае ошибки
+
+
+# Функция для создания фабрики сессий
+def create_sessionmaker(
+    bind_engine: Union[AsyncEngine, AsyncConnection]
+) -> Callable[..., async_sessionmaker]:
+    return async_sessionmaker(
+        bind=bind_engine,
+        expire_on_commit=False,
+        class_=AsyncSession,
+    )
+
+
+# Создание асинхронного движка для подключения к PostgreSQL
+engine = create_async_engine(settings.postgres_dsn.unicode_string())
+
+# Создание фабрики сессий
+async_session = create_sessionmaker(engine)
+
+# Создание зависимости для работы с базой данных
+db_dependency = Annotated[AsyncSession, Depends(get_async_session)]
