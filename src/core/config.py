@@ -6,7 +6,7 @@ from pydantic import PostgresDsn
 class AppSettings(BaseSettings):
     # Настройки приложения
     app_name: str = "Fast Pass API"
-    app_port: int = 8000
+    app_port: int = 8080
     app_host: str = 'localhost'
     reload: bool = True
     cpu_count: int | None = None

@@ -29,7 +29,7 @@ def create_sessionmaker(
 
 
 # Создание асинхронного движка для подключения к PostgreSQL
-engine = create_async_engine(settings.postgres_dsn.unicode_string())
+engine = create_async_engine(settings.postgres_dsn)
 
 # Создание фабрики сессий
 async_session = create_sessionmaker(engine)
