@@ -50,3 +50,8 @@ class SubmitDataResponse(BaseModel):
     coords: CoordsSchema
     images: List[ImageSchema]
     user: UserSchema
+
+
+class SimpleResponse(BaseModel):
+    message: str
+    share_link: str

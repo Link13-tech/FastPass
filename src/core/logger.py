@@ -26,9 +26,9 @@ LOGGING_CONFIG = {
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "detailed",
-            "filename": "C:/Users/Link/Documents/GitHub/FastApiCodeS/src/logs/my_app.log",
+            "filename": "C:/Users/Link/Documents/GitHub/FastPass/logs/my_app.log",
             "maxBytes": 10000,
-            "backupCount": 3
+            "backupCount": 3,
         },
         "queue_handler": {
             "class": "logging.handlers.QueueHandler",
