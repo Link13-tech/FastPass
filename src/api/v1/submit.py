@@ -17,13 +17,8 @@ logger = logging.getLogger("my_app")
 async def create_pereval(data: SubmitDataRequest, db: db_dependency):
     logger.info(f"Создание перевала для пользователя с email: {data.user.email}")
 
-    # Создаем или находим пользователя
     user = await get_or_create_user(db, data.user)
-
-    # Создаем экземпляр сервиса
     service = SubmitService(db)
-
-    # Используем сервис для создания перевала
     return await service.create_pereval(data, user)
 
 

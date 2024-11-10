@@ -44,20 +44,16 @@ class SubmitService:
                 result = await self.db.execute(pereval_query)
                 pereval_records = result.scalars().all()
 
-                # Логируем найденные перевалы
                 if pereval_records:
                     logger.info(f"Найденные перевалы: {[{'id': p.id, 'title': p.title, 'status': p.status} for p in pereval_records]}")
 
-                    # Берём первый найденный перевал
                     existing_pereval = pereval_records[0]
 
-                    # Если перевал уже существует, возвращаем сообщение и ссылку
                     return SimpleResponse(
                         message="Перевал с такими координатами уже существует.",
                         share_link=f"http://{settings.app_host}:{settings.app_port}/submit/get/{existing_pereval.id}"
                     )
 
-                # Если перевалов нет, возвращаем 404
                 raise HTTPException(status_code=404, detail="Перевал с такими координатами не найден")
 
             # Если координаты не существуют, создаем новые
@@ -67,12 +63,12 @@ class SubmitService:
                 height=data.coords.height
             )
             self.db.add(coords)
-            await self.db.flush()  # Ensure coords is saved to the database
+            await self.db.flush()
 
             # Создаем запись о перевале
             pereval = PerevalAdded(
                 user_id=user.id,
-                coord_id=coords.id,  # Use the newly created coords
+                coord_id=coords.id,
                 beauty_title=data.beauty_title,
                 title=data.title,
                 other_titles=data.other_titles,
@@ -90,7 +86,6 @@ class SubmitService:
                 images.append(image)
             await self.db.flush()
 
-            # Фиксируем все изменения
             await self.db.commit()
 
             return SubmitDataResponse(
