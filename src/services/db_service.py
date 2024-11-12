@@ -8,8 +8,8 @@ from sqlalchemy.orm import joinedload
 
 
 from src.core.config import settings
-from src.models import User, Coords, PerevalAdded, PerevalImages
-from src.schemas.submit import SubmitDataRequest, SubmitDataResponse, Status, CoordsSchema, ImageSchema, UserSchema, SimpleResponse
+from src.models import User, Coords, PerevalAdded, PerevalImages, Level
+from src.schemas.submit import SubmitDataRequest, SubmitDataResponse, Status, CoordsSchema, ImageSchema, UserSchema, SimpleResponse, LevelSchema
 
 logger = logging.getLogger("my_app")
 
@@ -65,10 +65,24 @@ class SubmitService:
             self.db.add(coords)
             await self.db.flush()
 
+            logger.info("Создание записи уровня сложности")
+            level = Level(
+                winter=data.level.winter,
+                summer=data.level.summer,
+                autumn=data.level.autumn,
+                spring=data.level.spring
+            )
+
+            self.db.add(level)
+            await self.db.flush()
+            logger.info(f"Уровень сложности успешно добавлен с ID: {level.id}")
+
             # Создаем запись о перевале
+            logger.info(f"Создание перевала: {data.title} для пользователя {user.email}")
             pereval = PerevalAdded(
                 user_id=user.id,
                 coord_id=coords.id,
+                level_id=level.id,
                 beauty_title=data.beauty_title,
                 title=data.title,
                 other_titles=data.other_titles,
@@ -81,7 +95,7 @@ class SubmitService:
             # Сохраняем изображения
             images = []
             for img in data.images:
-                image = PerevalImages(pereval_id=pereval.id, image_url=img.url)
+                image = PerevalImages(pereval_id=pereval.id, image_url=img.url, title=img.title)
                 self.db.add(image)
                 images.append(image)
             await self.db.flush()
@@ -92,22 +106,30 @@ class SubmitService:
                 message="Данные успешно отправлены",
                 share_link=f"http://{settings.app_host}:{settings.app_port}/submit/get/{pereval.id}",
                 status=pereval.status,
-                add_time=pereval.add_time,
                 beauty_title=pereval.beauty_title,
                 title=pereval.title,
                 other_titles=pereval.other_titles,
                 connect=pereval.connect,
+                add_time=pereval.add_time,
+                user=UserSchema(
+                    fam=user.fam,
+                    name=user.name,
+                    otc=user.otc,
+                    email=user.email,
+                    phone=user.phone
+                ),
                 coords=CoordsSchema(
                     latitude=coords.latitude,
                     longitude=coords.longitude,
                     height=coords.height
                 ),
-                images=[ImageSchema(url=image.image_url) for image in images],
-                user=UserSchema(
-                    name=user.name,
-                    email=user.email,
-                    phone=user.phone
-                )
+                level=LevelSchema(
+                    winter=level.winter,
+                    summer=level.summer,
+                    autumn=level.autumn,
+                    spring=level.spring
+                ),
+                images=[ImageSchema(url=image.image_url, title=image.title) for image in images],
             )
         except Exception as e:
             await self.db.rollback()
@@ -133,10 +155,11 @@ class SubmitService:
         return {"message": "Статус обновлен", "pereval_id": pereval.id, "status": pereval.status}
 
     async def get_pereval(self, pereval_id: int) -> SubmitDataResponse:
-        """Получение перевала с пользователем, координатами и изображениями."""
+        """Получение перевала с пользователем, координатами и изображениями и сложностью."""
         query = select(PerevalAdded).options(
             joinedload(PerevalAdded.user),
             joinedload(PerevalAdded.coords),
+            joinedload(PerevalAdded.level),
             joinedload(PerevalAdded.images)
         ).where(PerevalAdded.id == pereval_id)
 
@@ -150,20 +173,28 @@ class SubmitService:
             message="Данные перевала",
             share_link=f"http://{settings.app_host}:{settings.app_port}/submit/get/{pereval.id}",
             status=pereval.status,
-            add_time=pereval.add_time,
             beauty_title=pereval.beauty_title,
             title=pereval.title,
             other_titles=pereval.other_titles,
             connect=pereval.connect,
+            add_time=pereval.add_time,
+            user=UserSchema(
+                fam=pereval.user.fam,
+                name=pereval.user.name,
+                otc=pereval.user.otc,
+                email=pereval.user.email,
+                phone=pereval.user.phone
+            ),
             coords=CoordsSchema(
                 latitude=pereval.coords.latitude,
                 longitude=pereval.coords.longitude,
                 height=pereval.coords.height
             ),
-            images=[ImageSchema(url=image.image_url) for image in pereval.images],
-            user=UserSchema(
-                name=pereval.user.name,
-                email=pereval.user.email,
-                phone=pereval.user.phone
-            )
+            level=LevelSchema(
+                winter=pereval.level.winter,
+                summer=pereval.level.summer,
+                autumn=pereval.level.autumn,
+                spring=pereval.level.spring
+            ),
+            images=[ImageSchema(url=image.image_url, title=image.title) for image in pereval.images],
         )
