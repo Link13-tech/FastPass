@@ -1,7 +1,7 @@
 import logging
 from typing import Union
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from src.models.pereval import Status
 from src.db.db import db_dependency
@@ -16,6 +16,13 @@ logger = logging.getLogger("my_app")
 @submit_router.post("/create", response_model=Union[SubmitDataResponse, SimpleResponse], name="Создать перевал")
 async def create_pereval(data: SubmitDataRequest, db: db_dependency):
     logger.info(f"Создание перевала для пользователя с email: {data.user.email}")
+
+    if not data:
+        logger.error("Получены пустые данные")
+        raise HTTPException(status_code=400, detail="Ошибка: Данные не были переданы")
+    if not data.user:
+        logger.error("Данные пользователя отсутствуют")
+        raise HTTPException(status_code=400, detail="Ошибка: Данные пользователя не были переданы")
 
     user = await get_or_create_user(db, data.user)
     service = SubmitService(db)

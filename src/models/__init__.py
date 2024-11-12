@@ -3,6 +3,7 @@ from .user import User
 from .coords import Coords
 from .pereval import PerevalAdded, Status
 from .images import PerevalImages
+from .level import Level
 
 __all__ = [
     "Base",
@@ -10,5 +11,6 @@ __all__ = [
     "Coords",
     "PerevalAdded",
     "PerevalImages",
-    "Status"
+    "Status",
+    "Level"
 ]

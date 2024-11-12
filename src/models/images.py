@@ -9,5 +9,6 @@ class PerevalImages(Base):
     id = Column(Integer, primary_key=True)
     pereval_id = Column(Integer, ForeignKey("pereval_added.id"), nullable=False)
     image_url = Column(String, nullable=False)
+    title = Column(String, nullable=False)
 
     pereval = relationship("PerevalAdded", back_populates="images")

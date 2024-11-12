@@ -15,7 +15,14 @@ async def get_or_create_user(db: AsyncSession, user_data: UserSchema) -> User:
     user = result.scalar_one_or_none()
 
     if not user:
-        user = User(name=user_data.name, email=user_data.email, phone=user_data.phone)
+        if not user:
+            user = User(
+                fam=user_data.fam,
+                name=user_data.name,
+                otc=user_data.otc,
+                email=user_data.email,
+                phone=user_data.phone
+            )
         db.add(user)
         await db.commit()
         await db.refresh(user)

@@ -19,6 +19,7 @@ class PerevalAdded(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     coord_id = Column(Integer, ForeignKey("coords.id"), nullable=False)
+    level_id = Column(Integer, ForeignKey("levels.id"), nullable=True)
     beauty_title = Column(String)
     title = Column(String)
     other_titles = Column(String)
@@ -29,3 +30,4 @@ class PerevalAdded(Base):
     user = relationship("User", back_populates="perevals")
     coords = relationship("Coords", back_populates="perevals")
     images = relationship("PerevalImages", back_populates="pereval")
+    level = relationship("Level", back_populates="pereval", foreign_keys=[level_id])
