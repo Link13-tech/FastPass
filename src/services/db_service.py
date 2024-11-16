@@ -9,7 +9,8 @@ from sqlalchemy.orm import joinedload
 
 from src.core.config import settings
 from src.models import User, Coords, PerevalAdded, PerevalImages, Level
-from src.schemas.submit import SubmitDataRequest, SubmitDataResponse, Status, CoordsSchema, ImageSchema, UserSchema, SimpleResponse, LevelSchema
+from src.schemas.submit import SubmitDataRequest, SubmitDataResponse, Status, CoordsSchema, ImageSchema, UserSchema, SimpleResponse, LevelSchema, \
+    SubmitDataUpdateRequest
 
 logger = logging.getLogger("my_app")
 
@@ -198,3 +199,60 @@ class SubmitService:
             ),
             images=[ImageSchema(url=image.image_url, title=image.title) for image in pereval.images],
         )
+
+    async def update_pereval(self, pereval_id: int, data: SubmitDataUpdateRequest) -> dict:
+        """Обновление существующей записи и её изображений."""
+        async with self.db.begin():
+            # Получаем перевал по ID
+            query = select(PerevalAdded).where(PerevalAdded.id == pereval_id)
+            result = await self.db.execute(query)
+            pereval = result.scalar_one_or_none()
+
+            if not pereval:
+                return {"state": 0, "message": "Перевал не найден"}
+
+            # Проверяем, можно ли редактировать запись (только если статус `new`)
+            if pereval.status != Status.new:
+                return {"state": 0, "message": "Запись можно редактировать только в статусе new"}
+
+            # Обновляем поля перевала
+            pereval.beauty_title = data.beauty_title
+            pereval.title = data.title
+            pereval.other_titles = data.other_titles
+            pereval.connect = data.connect
+
+            # Обновляем координаты
+            coords_query = select(Coords).where(Coords.id == pereval.coord_id)
+            coords_result = await self.db.execute(coords_query)
+            coords = coords_result.scalar_one_or_none()
+            if coords:
+                coords.latitude = data.coords.latitude
+                coords.longitude = data.coords.longitude
+                coords.height = data.coords.height
+
+            # Обновляем уровень сложности
+            level_query = select(Level).where(Level.id == pereval.level_id)
+            level_result = await self.db.execute(level_query)
+            level = level_result.scalar_one_or_none()
+            if level:
+                level.winter = data.level.winter
+                level.summer = data.level.summer
+                level.autumn = data.level.autumn
+                level.spring = data.level.spring
+
+            # Обновляем изображения, если переданы новые
+            if data.images:
+                # Удаляем старые изображения
+                delete_query = select(PerevalImages).where(PerevalImages.pereval_id == pereval.id)
+                result = await self.db.execute(delete_query)
+                old_images = result.scalars().all()
+                for img in old_images:
+                    await self.db.delete(img)
+
+                # Добавляем новые изображения
+                for img in data.images:
+                    new_image = PerevalImages(pereval_id=pereval.id, image_url=img.url, title=img.title)
+                    self.db.add(new_image)
+
+            await self.db.commit()
+            return {"state": 1, "message": "Запись успешно обновлена"}

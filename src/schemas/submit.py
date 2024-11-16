@@ -81,3 +81,13 @@ class SubmitDataResponse(BaseModel):
 class SimpleResponse(BaseModel):
     message: str
     share_link: str
+
+
+class SubmitDataUpdateRequest(BaseModel):
+    beauty_title: str
+    title: str
+    other_titles: str
+    connect: str
+    coords: CoordsSchema
+    level: LevelSchema
+    images: List[ImageSchema]
