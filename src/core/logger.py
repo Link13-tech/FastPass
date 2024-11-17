@@ -29,6 +29,7 @@ LOGGING_CONFIG = {
             "filename": "C:/Users/Link/Documents/GitHub/FastPass/logs/my_app.log",
             "maxBytes": 10000,
             "backupCount": 3,
+            "delay": False
         },
         "queue_handler": {
             "class": "logging.handlers.QueueHandler",
@@ -45,6 +46,16 @@ LOGGING_CONFIG = {
         }
     }
 }
+
+
+class CustomRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def rotate(self, source, dest):
+        # Когда происходит ротация, вызываем остановку логирования
+        super().rotate(source, dest)
+        logging.shutdown()
 
 
 def setup_logging():
