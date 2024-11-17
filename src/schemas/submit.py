@@ -79,6 +79,7 @@ class SubmitDataResponse(BaseModel):
 
 
 class SimpleResponse(BaseModel):
+    state: int
     message: str
     share_link: str
 
