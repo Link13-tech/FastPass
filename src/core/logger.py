@@ -26,7 +26,7 @@ LOGGING_CONFIG = {
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "detailed",
-            "filename": "C:/Users/Link/Documents/GitHub/FastPass/logs/my_app.log",
+            "filename": "/app/logs/my_app.log",
             "maxBytes": 10000,
             "backupCount": 3,
             "delay": False
