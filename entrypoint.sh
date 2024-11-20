@@ -1,30 +1,26 @@
 #!/bin/sh
 
 echo "Проверяем состояние миграций..."
-MIGRATION_FILES=$(find alembic/versions -type f | wc -l)
-# Проверяем текущую версию миграций в базе
-CURRENT_VERSION=$(poetry run alembic current)
 
+# Получаем текущую версию миграции из базы данных
+CURRENT_VERSION=$(poetry run alembic current | awk '{print $1}')
+
+# Получаем последнюю версию миграции из папки alembic/versions
+LATEST_VERSION=$(ls alembic/versions/*.py | tail -n 1 | awk -F'_' '{print $1}' | xargs basename)
+
+# Эхо текущих версий
+echo "Текущая версия миграции в базе данных: $CURRENT_VERSION"
+echo "Последняя версия миграции в папке: $LATEST_VERSION"
+
+# Если база пуста, применяем все миграции
 if [ -z "$CURRENT_VERSION" ]; then
-    # База пустая, создаём первую миграцию и применяем её
-    echo "База пустая. Создаём первую миграцию..."
-    poetry run alembic revision --autogenerate -m "Initial migration"
+    echo "База данных пуста. Применяем все миграции из репозитория..."
     poetry run alembic upgrade head
-elif [ "$MIGRATION_FILES" -eq 0 ] && [ -n "$CURRENT_VERSION" ]; then
-    # Папка пуста, но база имеет миграцию, синхронизируем с помощью stamp
-    echo "Папка версий пуста, синхронизируем состояние с базой..."
-
-    # Удаляем старую запись из таблицы alembic_version (если существует)
-    poetry run psql -c "DELETE FROM alembic_version;"
-
-    # Обновляем таблицу alembic_version, чтобы указать, что миграция уже применена
-    poetry run alembic stamp head
-
-    echo "Создаём новую миграцию с учётом изменений в моделях..."
-    poetry run alembic revision --autogenerate -m "Auto migration update"
+elif [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+    echo "Версия базы данных ($CURRENT_VERSION) отличается от последней миграции ($LATEST_VERSION). Применяем миграции..."
     poetry run alembic upgrade head
 else
-    echo "Миграции были применены. Текущая версия: $CURRENT_VERSION"
+    echo "Все миграции уже применены. Версия базы данных: $CURRENT_VERSION."
 fi
 
 echo "Запускаем приложение..."
