@@ -87,7 +87,4 @@ EXPOSE 8080
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# ƒобавл€ем volume дл€ хранени€ миграций и базы данных
-VOLUME ["/app/alembic/versions"]
-
 CMD ["/app/entrypoint.sh"]
