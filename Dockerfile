@@ -84,5 +84,7 @@ RUN mkdir -p /app/logs && chmod -R 755 /app/logs
 # Открываем порт для приложения
 EXPOSE 8080
 
-# Команда для запуска приложения
-CMD ["sh", "-c", "if alembic history | grep 'Initial migration'; then echo 'Миграция уже существует, пропускаем...'; else alembic revision --autogenerate -m 'Initial migration' && alembic upgrade head; fi && poetry run uvicorn main:app --host 0.0.0.0 --port 8080"]
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+CMD ["/app/entrypoint.sh"]
