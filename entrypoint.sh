@@ -1,14 +1,12 @@
 #!/bin/sh
 
-# Проверяем текущую версию базы данных
-CURRENT_VERSION=$(alembic current | grep "head")
-
-if [ -n "$CURRENT_VERSION" ]; then
-    echo "Миграции уже применены, пропускаем создание и применение."
+echo "Проверяем состояние миграций..."
+if poetry run alembic current | grep "head"; then
+    echo "Миграции уже применены."
 else
-    echo "Создаём первую миграцию и применяем её..."
-    alembic revision --autogenerate -m 'Initial migration'
-    alembic upgrade head
+    echo "Создаём и применяем миграции..."
+    poetry run alembic revision --autogenerate -m "Initial migration"
+    poetry run alembic upgrade head
 fi
 
 # Запускаем приложение
