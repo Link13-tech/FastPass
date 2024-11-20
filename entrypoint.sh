@@ -13,8 +13,14 @@ if [ -z "$CURRENT_VERSION" ]; then
 elif [ "$MIGRATION_FILES" -eq 0 ] && [ -n "$CURRENT_VERSION" ]; then
     # Папка пуста, но база имеет миграцию, синхронизируем с помощью stamp
     echo "Папка версий пуста, синхронизируем состояние с базой..."
-    poetry run alembic stamp head   # Обновляем таблицу alembic_version, чтобы указать, что миграция уже применена
-    echo "Создаём новую миграцию с учётом изменений в моделях(есл они были)..."
+
+    # Удаляем старую запись из таблицы alembic_version (если существует)
+    poetry run psql -c "DELETE FROM alembic_version;"
+
+    # Обновляем таблицу alembic_version, чтобы указать, что миграция уже применена
+    poetry run alembic stamp head
+
+    echo "Создаём новую миграцию с учётом изменений в моделях..."
     poetry run alembic revision --autogenerate -m "Auto migration update"
     poetry run alembic upgrade head
 else
