@@ -18,7 +18,7 @@ elif [ "$MIGRATION_FILES" -eq 0 ] && [ -n "$CURRENT_VERSION" ]; then
     poetry run alembic revision --autogenerate -m "Auto migration update"
     poetry run alembic upgrade head
 else
-    echo "Миграции уже применены. Текущая версия: $CURRENT_VERSION"
+    echo "Миграции были применены. Текущая версия: $CURRENT_VERSION"
 fi
 
 echo "Запускаем приложение..."
