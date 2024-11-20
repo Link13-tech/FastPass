@@ -3,10 +3,10 @@
 echo "Проверяем состояние миграций..."
 
 # Получаем текущую версию миграций в базе данных
-CURRENT_VERSION=$(poetry run alembic current --short)
+CURRENT_VERSION=$(poetry run alembic current)
 
 # Если версия не найдена или это первый запуск, создаем миграцию
-if [ -z "$CURRENT_VERSION" ] || [ "$CURRENT_VERSION" == "head" ]; then
+if [ -z "$CURRENT_VERSION" ] || [ "$CURRENT_VERSION" == "0" ]; then
     echo "Миграции не найдены или это первый запуск, создаем и применяем миграции..."
     # Создаем миграцию и применяем её
     poetry run alembic revision --autogenerate -m "Initial migration"
