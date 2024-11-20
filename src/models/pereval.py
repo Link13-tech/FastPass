@@ -24,7 +24,7 @@ class PerevalAdded(Base):
     title = Column(String)
     other_titles = Column(String)
     connect = Column(String)
-    add_time = Column(DateTime, default=datetime.utcnow)
+    add_time = Column(DateTime, default=datetime.now)
     status = Column(Enum(Status), default=Status.new)
 
     user = relationship("User", back_populates="perevals")

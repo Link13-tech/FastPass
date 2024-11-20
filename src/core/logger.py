@@ -1,6 +1,13 @@
 import logging.config
 import logging.handlers
+from pathlib import Path
 from queue import Queue
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -26,7 +33,7 @@ LOGGING_CONFIG = {
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "detailed",
-            "filename": "C:/Users/Link/Documents/GitHub/FastPass/logs/my_app.log",
+            "filename": str(LOG_DIR / "my_app.log"),
             "maxBytes": 10000,
             "backupCount": 3,
             "delay": False
