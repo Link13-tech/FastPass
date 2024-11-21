@@ -1,3 +1,4 @@
+import time
 import atexit
 import logging
 import logging.config
@@ -83,5 +84,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 
 if __name__ == '__main__':
+    print("App is starting, waiting for services to wake up...")
+    time.sleep(5)
+    print("Starting the server...")
     print(uvicorn_options)
     uvicorn.run('main:app', **uvicorn_options)
