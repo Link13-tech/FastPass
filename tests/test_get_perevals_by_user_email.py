@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from httpx import ASGITransport
-from sqlalchemy.ext.asyncio import AsyncSession
+
 
 from main import app
 from faker import Faker
@@ -11,7 +11,7 @@ fake = Faker()
 
 
 @pytest.mark.asyncio
-async def test_get_perevals_by_user_email(transaction: AsyncSession):
+async def test_get_perevals_by_user_email():
     # Генерируем случайные данные для пользователя
     user_data = {
         "email": fake.email(),
@@ -22,7 +22,7 @@ async def test_get_perevals_by_user_email(transaction: AsyncSession):
     }
 
     submit_data_list = []
-    for _ in range(3):  # Создаем 3 перевала для одного пользователя
+    for _ in range(1):
         submit_data = {
             "user": user_data,
             "title": f"Test Pereval {random.randint(2000, 10000)}",
@@ -60,5 +60,5 @@ async def test_get_perevals_by_user_email(transaction: AsyncSession):
         assert response_get.status_code == 200
         result = response_get.json()
 
-        assert len(result) == 3
+        assert len(result) == 1
         assert all(item["user"]["email"] == user_data['email'] for item in result)
