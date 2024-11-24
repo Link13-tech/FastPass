@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from httpx import ASGITransport
 from main import app
-from src.schemas.submit import Status
+from src.models.pereval import Status
 
 
 @pytest.mark.asyncio
@@ -20,10 +20,9 @@ async def test_update_pereval_status(transaction, create_pereval):
         pereval_id = data["share_link"].split("/")[-1]
         status = Status.accepted
 
-        # Обновляем статус перевала
+        # Обновляем статус перевала через параметры URL
         response_patch = await client.patch(
-            f"/submit/submitData/update-status/{pereval_id}",
-            json={"status": status.value}
+            f"/submit/submitData/update-status/{pereval_id}?status={status.value}"  # Параметр в URL
         )
         assert response_patch.status_code == 200
 
