@@ -26,17 +26,17 @@ Fast Pass API — это REST API для работы с перевалами, �
 
 ## Swagger UI
 
-После запуска приложения документация доступна по адресу [http://localhost:8080/api/openapi](http://localhost:8080/docs).
+После запуска приложения документация доступна по адресу [http://localhost:8080/api/openapi](http://localhost:8080/api/openapi).
 
-Альтернатива [http://localhost:8080/redoc](http://localhost:8080/docs).
+Альтернатива [http://localhost:8080/redoc](http://localhost:8080/redoc).
 
 ---
 
 ## Хостинг (Пример с Railway.app)
 
 Пример вызова документации опубликованного API:
-- URL: `https://fastpass-production.up.railway.app/api/openapi`
+- URL: [https://fastpass-production.up.railway.app/api/openapi](https://fastpass-production.up.railway.app/api/openapi).
 
 Альтернатива:
-- URL: `https://fastpass-production.up.railway.app/redoc`
+- URL: [https://fastpass-production.up.railway.app/redoc](https://fastpass-production.up.railway.app/redoc).
 ---
