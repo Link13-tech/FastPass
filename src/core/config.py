@@ -1,6 +1,11 @@
 import multiprocessing
+import os
 from pydantic_settings import BaseSettings
 from pydantic import PostgresDsn
+from dotenv import load_dotenv
+
+load_dotenv()
+print("Mode:", os.getenv('mode'))
 
 
 class AppSettings(BaseSettings):
