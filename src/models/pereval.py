@@ -28,6 +28,6 @@ class PerevalAdded(Base):
     status = Column(Enum(Status), default=Status.new)
 
     user = relationship("User", back_populates="perevals")
-    coords = relationship("Coords", back_populates="perevals")
-    images = relationship("PerevalImages", back_populates="pereval")
-    level = relationship("Level", back_populates="pereval", foreign_keys=[level_id])
+    coords = relationship("Coords", back_populates="perevals", cascade="all, delete-orphan", single_parent=True)
+    images = relationship("PerevalImages", back_populates="pereval", cascade="all, delete-orphan", single_parent=True)
+    level = relationship("Level", back_populates="pereval", foreign_keys=[level_id], cascade="all, delete-orphan", single_parent=True)

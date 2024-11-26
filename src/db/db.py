@@ -1,4 +1,7 @@
+import os
+
 from fastapi import Depends
+from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import (async_sessionmaker, create_async_engine, AsyncSession, AsyncEngine, AsyncConnection)
 from src.core.config import settings
 from typing import Union, Callable, Annotated
@@ -14,7 +17,7 @@ async def get_async_session() -> AsyncSession:
         try:
             yield session
         except InternalError:
-            await session.rollback()  # откат транзакции в случае ошибки
+            await session.rollback()
 
 
 # Функция для создания фабрики сессий
@@ -29,10 +32,16 @@ def create_sessionmaker(
 
 
 # Создание асинхронного движка для подключения к PostgreSQL
-engine = create_async_engine(settings.postgres_dsn)
+if os.environ['mode'] == "TEST":
+    engine = create_async_engine(settings.postgres_dsn, poolclass=NullPool)
+else:
+    engine = create_async_engine(settings.postgres_dsn)
+
+engine_null_pool = create_async_engine(settings.postgres_dsn, poolclass=NullPool)
 
 # Создание фабрики сессий
 async_session = create_sessionmaker(engine)
+async_session_null_pool = create_sessionmaker(engine_null_pool)
 
 # Создание зависимости для работы с базой данных
 db_dependency = Annotated[AsyncSession, Depends(get_async_session)]

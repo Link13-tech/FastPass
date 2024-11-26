@@ -14,6 +14,7 @@ class AppSettings(BaseSettings):
     algorithm: str = "HS256"
 
     # Переменные базы данных из .env
+    mode: str
     fstr_db_host: str
     fstr_db_port: int
     fstr_db_login: str

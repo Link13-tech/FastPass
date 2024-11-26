@@ -38,10 +38,10 @@ class ImageSchema(BaseModel):
 
 
 class LevelSchema(BaseModel):
-    winter: str = Field(..., description="Допустимые значения: 1A, 1B, 2A, 2B, 3A, 3B, пустое значение", example="3A")
-    summer: str = Field(..., description="Допустимые значения: 1A, 1B, 2A, 2B, 3A, 3B, пустое значение", example="2A")
-    autumn: str = Field(..., description="Допустимые значения: 1A, 1B, 2A, 2B, 3A, 3B, пустое значение", example="2B")
-    spring: str = Field(..., description="Допустимые значения: 1A, 1B, 2A, 2B, 3A, 3B, пустое значение", example="1A")
+    winter: str = Field(..., description="Допустимые значения: 1A, 1B, 2A, 2B, 3A, 3B, пустое значение")
+    summer: str = Field(..., description="Допустимые значения: 1A, 1B, 2A, 2B, 3A, 3B, пустое значение")
+    autumn: str = Field(..., description="Допустимые значения: 1A, 1B, 2A, 2B, 3A, 3B, пустое значение")
+    spring: str = Field(..., description="Допустимые значения: 1A, 1B, 2A, 2B, 3A, 3B, пустое значение")
 
     @field_validator("winter", "summer", "autumn", "spring")
     def check_valid_level(cls, value):
